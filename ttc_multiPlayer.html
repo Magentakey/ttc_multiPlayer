@@ -1,0 +1,769 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tic tac toc</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            border: 2px solid red;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container div {
+            border: 2px solid blue;
+            width: 100%;
+            height: 100%;
+            flex: 100%;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .container div div {
+            border: 2px solid yellow;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .dead {
+            background-color: gray;
+            opacity: 0.25;
+        }
+
+        .containerPlayer {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 3px solid black;
+            width: 50vh;
+            height: auto;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 99999999999;
+        }
+
+        .containerPlayer:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        .containerPlayerDisplay {
+            display: none;
+        }
+
+        .containerPlayerJalanNow {
+            display: none;
+            border: 5px solid black;
+            width: 25vh;
+            text-align: center;
+            height: auto;
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 0);
+            /* opacity: 0.25; */
+        }
+
+        .displayContainerPlayerJalanNow {
+            display: block;
+        }
+
+        .containerSettingPlayer {
+            width: 100%;
+            height: 100vh;
+            border: 1px solid black;
+            position: absolute;
+            z-index: 9999999999999999;
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+
+        .containerKemungkinan {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 99999999999999999999999999999999999999999999;
+            background-color: rgb(136, 131, 131);
+            width: 50vw;
+            height: 50vh;
+            border: 1px solid blue;
+        }
+
+        .containerKemungkinanDisplay {
+            display: none;
+        }
+
+        .containerKemungkinan p {
+            border: 1px solid black;
+            padding: 0 10px;
+            cursor: pointer;
+            color: aqua;
+            background-color: green;
+        }
+    </style>
+</head>
+
+<body onload="init()">
+    <div class="containerPlayerJalanNow">
+        <p><!-- player 1 jalan --></p>
+        <!-- <img src="image/o-tic-tac-toc.jpg" style="max-width: 100%;max-height: 100%;aspect-ratio: 2.5 / 1;"> -->
+        <img>
+    </div>
+
+    <div class="containerPlayer">
+        <div style="position:absolute;right:0;cursor:default"
+            onclick="containerPlayer.classList.toggle('containerPlayerDisplay');">X</div>
+        <div class="containerPointPlayer">
+            <!-- <p>point player 1 : </p> -->
+            <!-- <p>point player 2 : </p> -->
+        </div>
+        <div class="containerOption">
+            <input id="panjangBaris" type="text" placeholder="baris" value="">
+            <input id="panjangKolom" type="text" placeholder="kolom" value="">
+            <input id="banyakPlayer" type="text" placeholder="banyak player" value="">
+        </div>
+        <button id="btnPlayReset" type="button" onclick="playGame()">PLAY!</button>
+        <!-- <button style="display:none;" id="btnPlayCheckWin" type="button"
+            onclick="checkWin(player[play])">checkWin!</button> -->
+    </div>
+
+    <div class="containerSettingPlayer" style="display: none;">
+        <center>
+            <h1 id="playerNowSetting">Player 1 setting!</h1>
+        </center>
+        <br><br>
+        <div style="display: flex;align-items: flex-start;height:70%;">
+            <h4 style="position: absolute;">create image Tic Tac Toe</h4>
+            <canvas id="can" width="400px" height="400px" style="border:2px solid;"></canvas>
+            <div>
+                Color
+                <div style="display: grid; grid-template-columns: auto auto auto;">
+                    <div style="width:10px;height:10px;background:green;" id="green" onclick="color(this)"></div>
+                    <div style="width:10px;height:10px;background:blue;" id="blue" onclick="color(this)"></div>
+                    <div style="width:10px;height:10px;background:red;" id="red" onclick="color(this)"></div>
+                    <div style="width:10px;height:10px;background:yellow;" id="yellow" onclick="color(this)"></div>
+                    <div style="width:10px;height:10px;background:orange;" id="orange" onclick="color(this)"></div>
+                    <div style="width:10px;height:10px;background:black;" id="black" onclick="color(this)"></div>
+                </div>
+                <div>Eraser</div>
+                <div style="width:15px;height:15px;background:white;border:2px solid;" id="white" onclick="color(this)">
+                </div>
+            </div>
+            <div style="position: relative;">
+                <img id="canvasimg" style="display:none;">
+                <input style="position: absolute;left:0;bottom:0;display: none;" type="button" value="next"
+                    id="btnNextPlayer" size="30" onclick="nextPlayer()">
+            </div>
+        </div>
+        <input type="button" value="save" id="btn" size="30" onclick="save()">
+        <input type="button" value="clear" id="clr" size="23" onclick="erase()">
+
+        <div id="containerSaveImg"
+            style="width: 100%; height: 15%;border: 4px solid red;overflow-x: scroll;display: flex;">
+
+        </div>
+
+        <input style="width:50%;height:5%;background-color: aqua;text-align: center; position: absolute;
+                      bottom:0;left: 50%;transform:translate(-50%,0);" type="text" placeholder="nama player!"
+            id="nickPlayer" size="23">
+    </div>
+
+    <div class="container"><!-- kotak2 -->
+
+    </div>
+
+    <div class="containerKemungkinan containerKemungkinanDisplay">
+        <!-- <div class="containerKemungkinan"> -->
+        <p>vetrikal atas</p>
+        <p>vetrikal tengah</p>
+        <p>vetrikal bawah</p>
+    </div>
+
+</body>
+<script>
+    const papah = document.querySelector(".container");
+    console.log(papah);  /* element papah */
+    const barisElement = document.querySelectorAll(".container div");
+    console.log(barisElement);  /* element baris */
+    const barisSpesifik = document.querySelectorAll(".container div div");
+    console.log(barisSpesifik);  /* element baris spesifik*/
+    // const start = document.querySelector(".kotak11");
+    // console.log(start);  /* element start*/
+
+    // let pointPlayer1 = document.getElementById("pointPlayer1");
+    let containerPlayerJalanNow = document.querySelector(".containerPlayerJalanNow");
+    let containerPlayer = document.querySelector(".containerPlayer");
+    let containerPointPlayer = document.querySelector(".containerPointPlayer");
+    let containerPlayerButton = document.querySelector(`.containerPlayer button`);
+    let containerSettingPlayer = document.querySelector(".containerSettingPlayer")
+    let containerKemungkinan = document.querySelector(".containerKemungkinan")
+    let containerOption = document.querySelector(".containerOption")
+    let nickPlayer = document.querySelector("#nickPlayer");
+
+    // make them global
+    let player = "";
+    let play = "";
+    let playerFisrtPlay = -1;
+    let imgTicTacToe = "";
+    let udhPernahDiPencet = "";
+    let banyakPlayer = "";
+    let playerCount = 1;
+    let dataURL = "";
+    let patokanSaveImage = 0;
+    let arrBlock = [];
+    let loopArrBlock = 1;
+
+    let playerNowSetting = document.querySelector(`#playerNowSetting`);
+    let containerSaveImg = document.querySelector("#containerSaveImg");
+
+    containerPlayerJalanNow.addEventListener("click", displaycontainerPlayerJalanNow);
+    function displaycontainerPlayerJalanNow() {
+        containerPlayerJalanNow.classList.toggle("displayContainerPlayerJalanNow");
+    }
+
+    function playGame() {
+        //document.getElementById("btnPlayCheckWin").style.display = "block";
+        playerCount = 1;
+        playerNowSetting.innerText = `Player ${playerCount} setting!`;
+        // let buttonPlay = document.getElementById("buttonPlay");
+        let panjangBaris = document.getElementById("panjangBaris");
+        let panjangKolom = document.getElementById("panjangKolom");
+        banyakPlayer = document.getElementById("banyakPlayer");
+
+        // kotak2 gone
+        while (papah.firstChild) {
+            papah.firstChild.remove();
+        }
+        // players gone
+        while (containerPointPlayer.firstChild) {
+            containerPointPlayer.firstChild.remove();
+        }
+        // saveimg gone
+        while (containerSaveImg.firstChild) {
+            containerSaveImg.firstChild.remove();
+        }
+
+        panjangBaris = Number(panjangBaris.value);
+        panjangKolom = Number(panjangKolom.value);
+        banyakPlayer = Number(banyakPlayer.value);
+        console.log("baris = " + panjangBaris);
+        console.log("kolom = " + panjangKolom);
+        console.log("banyak player = " + banyakPlayer);
+
+        if (panjangBaris < 3 || panjangKolom < 3 /*|| panjangBaris > 10 || panjangKolom > 10*/ || isNaN(panjangBaris) || isNaN(panjangKolom)) {
+            alert(`baris dan kolom tidak boleh kurang dari 3 \n dan tidak lebih dari 10 \n dan harus angka`);
+        } else if (panjangBaris >= 1 /*&& panjangBaris <= 10*/ && panjangKolom >= 1 /*&& panjangKolom <= 10*/) {
+            // membuat kotak2
+            for (let i = 1; i <= panjangBaris; i++) {
+                const blockBaris = document.createElement("div");
+                blockBaris.setAttribute("class", `kotak${i}`);
+                blockBaris.classList.add("anakPapah");
+                papah.appendChild(blockBaris);
+                for (let j = 1; j <= panjangKolom; j++) {
+                    const blockKolom = document.createElement("div");
+                    blockKolom.setAttribute("class", `kotak${i}${j} baris${i} kolom${j}`);
+                    blockBaris.appendChild(blockKolom);
+                }
+            }
+
+
+            // let nickPlayer = document.querySelector("#nickPlayer");
+            // jumlah player
+            play = 0;
+            player = [];
+            imgTicTacToe = [];
+            for (let i = 1; i <= banyakPlayer; i++) {
+                const playerMain = document.createElement("p");
+                playerMain.innerText = `${i}-Point player ${i} : `;
+                containerPointPlayer.appendChild(playerMain);
+
+                player.push(i);
+            }
+            // setting player
+            containerSettingPlayer.style.display = "block";
+
+            // toogle display container player
+            containerPlayer.classList.toggle("containerPlayerDisplay");
+
+            udhPernahDiPencet = new Set([]);
+            papah.addEventListener("click", clickFunctionPapah);
+            // let player = [1,2];
+            // let play = 0;
+
+            const btnPlayReset = document.getElementById("btnPlayReset");
+            console.log(btnPlayReset);
+            btnPlayReset.innerText = "RESET!";
+        }
+    }
+
+
+    function nextPlayer() {
+        // imgTicTacToe    >>> array
+        // nickPlayer      >>> input
+        let playerSelector = document.querySelectorAll(`.containerPointPlayer p`);
+        playerNowSetting = document.querySelector(`#playerNowSetting`);
+
+        let canvasimg = document.querySelector(`#canvasimg`);
+        canvasimg.style.display = "none";
+        let btnNextPlayer = document.querySelector(`#btnNextPlayer`);
+        btnNextPlayer.style.display = "none";
+
+        playerNowSetting.innerText = `Player ${playerCount + 1} setting!`;
+
+        // setting nickname
+        let textPlayer123 = "";
+        if (Boolean(nickPlayer.value)) {
+            textPlayer123 = `${playerCount}-Point ${nickPlayer.value} : `;
+        } else {
+            textPlayer123 = `${playerCount}-Point player ${playerCount} : `;
+        }
+        playerSelector[playerCount - 1].innerText = `${textPlayer123}`;
+
+        // setting image player tic tac toe
+        let imgPush = "";
+        imgPush = document.createElement("img");
+        imgPush.setAttribute("src", `${dataURL}`);
+        imgPush.setAttribute("style", "max-width: 100%;max-height: 100%;aspect-ratio: 2.5 / 1;");
+        imgTicTacToe.push(imgPush);
+
+        console.log(banyakPlayer);
+        console.log(nickPlayer.value);
+        console.log(Boolean(nickPlayer.value));
+        console.log(playerSelector[1]);
+        console.log(imgTicTacToe);
+        console.log(player);
+
+        if (playerCount >= banyakPlayer) {
+            // setting player done
+            containerSettingPlayer.style.display = "none";
+
+            // first play
+            containerPlayerJalanNow.classList.toggle("displayContainerPlayerJalanNow");
+            containerPlayerJalanNow.firstElementChild.innerHTML = `player ${player[0]} jalan!`;
+            containerPlayerJalanNow.lastElementChild.replaceWith(imgTicTacToe[0]);
+        }
+        playerCount++;
+
+        containerSaveImg = document.querySelector("#containerSaveImg");
+        console.log(containerSaveImg);
+        const imgSave = document.createElement("img");
+        imgSave.src = dataURL;
+        imgSave.setAttribute("style", "max-width: 100%;max-height: 100%;aspect-ratio: 2.5 / 1;border: 2px solid black;");
+        containerSaveImg.appendChild(imgSave);
+    }
+
+    // papah.addEventListener("click", function(e){
+    function clickFunctionPapah(e) {
+        console.log(e.target);  /* element yg ditarget */
+        console.log(e.target.tagName);  /* element yg ditarget */
+        // console.log(e.target.className);  /* element class yg ditarget */
+        // console.log(start.className);  /* element class dari start */
+        if (e.target.tagName == "IMG") {
+            alert(`kotaknya ${e.target.parentNode.classList.item(3)}\n${e.target.parentNode.classList.item(1)}\n${e.target.parentNode.classList.item(2)}`);
+        }
+
+        console.log(`playerPlay = ${player[play]}`);
+        // pencegahan mencet element papah, bukan tag div, double click di kotak yang sama, dan bukan element anak papah
+        if (e.target.tagName == "DIV" && e.target != papah && !udhPernahDiPencet.has(e.target.classList.item(0)) && !e.target.classList.contains("anakPapah")) {
+            e.target.style.backgroundColor = "#dbdbdb";
+            const imgPlay = imgTicTacToe[play].cloneNode(true);
+            e.target.appendChild(imgPlay);
+            let playerStringContains = e.target.classList.item(3);
+            if (!Boolean(playerStringContains)) {
+                e.target.classList.add(`player${player[play]}`)
+            }
+            //checkWin(e.target, player[play]);
+
+            udhPernahDiPencet.add(e.target.classList.item(0));
+            if (!containerPlayerJalanNow.classList.contains("displayContainerPlayerJalanNow")) {
+                containerPlayerJalanNow.classList.toggle("displayContainerPlayerJalanNow");
+            }
+
+
+            let confirmCheckWin = confirm("checkwin?");
+            if (confirmCheckWin) {
+                //al;sdk;laskd;l
+                //papah.addEventListener("click", clickFunctionPapah);
+                papah.removeEventListener("click", clickFunctionPapah);
+                papah.addEventListener("click", clickFunctionPapah2);
+                arrBlock = [];
+            }
+            else {
+                play++;
+                // looping jalan player
+                if (play >= player.length) {
+                    play = 0;
+                }
+
+                // image jalan now
+                containerPlayerJalanNow.firstElementChild.innerHTML = `player ${player[play]} jalan!`;
+                containerPlayerJalanNow.lastElementChild.replaceWith(imgTicTacToe[play]);
+            }
+        }
+        console.log(udhPernahDiPencet);
+    };
+
+    function clickFunctionPapah2(e) {
+        console.log(e.target);  /* element yg ditarget */
+        console.log(e.target.tagName);  /* element yg ditarget */
+        // console.log(e.target.className);  /* element class yg ditarget */
+        // console.log(start.className);  /* element class dari start */
+        let classItem3 = "";
+        let classItem3TanpaString = "";
+        if (e.target.tagName == "IMG" && !e.target.parentNode.classList.contains("dead")) {
+            classItem3 = e.target.parentNode.classList.item(3);
+            classItem3TanpaString = classItem3.replace(/[a-z]/g, '');
+            if (classItem3TanpaString == player[play]) {
+                //alert(`kotaknya ${e.target.parentNode.classList.item(3)}\n${e.target.parentNode.classList.item(1)}\n${e.target.parentNode.classList.item(2)}`);
+                e.target.parentNode.style.backgroundColor = "#78ff9c";
+                arrBlock.push(e.target.parentNode);
+                console.log(arrBlock);
+            }
+        }
+
+        if (loopArrBlock <= 2 && e.target.tagName == "IMG" && !e.target.parentNode.classList.contains("dead") && classItem3TanpaString == player[play]) {
+            loopArrBlock++;
+        } else if (loopArrBlock >= 3 && e.target.tagName == "IMG" && !e.target.parentNode.classList.contains("dead") && classItem3TanpaString == player[play]) {
+            loopArrBlock = 1;
+            let confirmCheckWin = confirm("confirm checkwin?");
+            if (confirmCheckWin) {
+                //al;sdk;laskd;l
+                //papah.addEventListener("click", clickFunctionPapah);
+                //papah.removeEventListener("click", clickFunctionPapah);
+                //papah.addEventListener("click", clickFunctionPapah2);
+                checkWin();
+            } else {
+                for (let i = 0; i < arrBlock.length; i++) {
+                    arrBlock[i].style.backgroundColor = "#dbdbdb";
+                }
+                arrBlock = [];
+                let lanjutCheckWin = confirm(`lanjut checkwin?`);
+                if (!lanjutCheckWin) {
+                    papah.removeEventListener("click", clickFunctionPapah2);
+                    papah.addEventListener("click", clickFunctionPapah);
+                    play++;
+                    // looping jalan player
+                    if (play >= player.length) {
+                        play = 0;
+                    }
+                    // image jalan now
+                    containerPlayerJalanNow.firstElementChild.innerHTML = `player ${player[play]} jalan!`;
+                    containerPlayerJalanNow.lastElementChild.replaceWith(imgTicTacToe[play]);
+                }
+            }
+        }
+        console.log(`loopArrBlock ${loopArrBlock}`);
+    };
+
+    function checkWin() {
+        // let selectorNow = e;
+        console.log("check win = " + player[play]);
+        // console.log(e.classList.item(1));
+
+        let classItem0 = arrBlock[0].classList.item(0);
+        let classItem1 = arrBlock[0].classList.item(1);
+        let classItem2 = arrBlock[0].classList.item(2);
+        let classItem0TanpaString = classItem0.replace(/[a-z]/g, '');
+        let classItem1TanpaString = classItem1.replace(/[a-z]/g, '');
+        let classItem2TanpaString = classItem2.replace(/[a-z]/g, '');
+        // let classItem0TanpaStringChangeToNumber = Number(classItem0TanpaString);
+        let barisSelector = Number(classItem1TanpaString);
+        let kolomSelector = Number(classItem2TanpaString);
+        //! penting!! buat 2 class untuk bari dan kolom biar bisa lebih dari 9
+        //console.log(classItem0);
+        //console.log(classItem0TanpaString);
+        //console.log(classItem0TanpaString[0]);
+        //console.log(classItem0TanpaString[1]);
+
+        let punyaPlayer = arrBlock[0].classList.item(3);
+        let tambahPoint = document.querySelectorAll(`.containerPointPlayer p`)[player[play] - 1];
+        console.log(tambahPoint);
+
+        // looping vertikal
+        for (let o = 0; o <= 2; o++) {
+            point = 0;
+            for (let i = ((barisSelector - 2) + o); i <= (barisSelector + o); i++) {
+                if (i < 1 || i > panjangBaris) {
+                    i = barisSelector + o + 1;
+                } else {
+                    let elementSelector = document.querySelector(`.kotak${i}${kolomSelector}`);
+                    console.log(elementSelector);
+                    if (elementSelector != null) {
+                        if (elementSelector.style.backgroundColor == "rgb(120, 255, 156)" && elementSelector.classList.item(3) == punyaPlayer && !elementSelector.classList.contains("dead")) {
+                            point++;
+                        }
+                    }
+                    console.log(point);
+                    if (point == 3) {
+                        containerPlayer.classList.toggle("containerPlayerDisplay");
+                        tambahPoint.innerHTML += "|";
+                        for (let o = (i - 2); o <= i; o++) {
+                            let selector = document.querySelector(`.kotak${o}${kolomSelector}`);
+                            selector.classList.add("dead");
+                        }
+                        papah.removeEventListener("click", clickFunctionPapah2);
+                        papah.addEventListener("click", clickFunctionPapah);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // looping horzontal
+        for (let o = 0; o <= 2; o++) {
+            point = 0;
+            for (let i = ((kolomSelector - 2) + o); i <= (kolomSelector + o); i++) {
+                if (i < 1 || i > panjangKolom) {
+                    i = kolomSelector + o + 1;
+                } else {
+                    let elementSelector = document.querySelector(`.kotak${barisSelector}${i}`);
+                    console.log(elementSelector);
+                    if (elementSelector != null) {
+                        if (elementSelector.style.backgroundColor == "rgb(120, 255, 156)" && elementSelector.classList.item(3) == punyaPlayer && !elementSelector.classList.contains("dead")) {
+                            point++;
+                        }
+                    }
+                    console.log(point);
+                    if (point == 3) {
+                        // pointHorizontal++;
+                        containerPlayer.classList.toggle("containerPlayerDisplay");
+                        tambahPoint.innerHTML += "|";
+                        for (let o = (i - 2); o <= i; o++) {
+                            let selector = document.querySelector(`.kotak${barisSelector}${o}`);
+                            selector.classList.add("dead");
+                        }
+                        papah.removeEventListener("click", clickFunctionPapah2);
+                        papah.addEventListener("click", clickFunctionPapah);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // // looping serong kiri
+        for (let o = 0; o <= 2; o++) {
+            point = 0;
+            for (let i = (2 - o); i >= (o * -1); i--) {
+                let elementSelector = document.querySelector(`.kotak${barisSelector - i}${kolomSelector - i}`);
+                console.log(elementSelector);
+                if (elementSelector != null) {
+                    if (elementSelector.style.backgroundColor == "rgb(120, 255, 156)" && elementSelector.classList.item(3) == punyaPlayer && !elementSelector.classList.contains("dead")) {
+                        point++;
+                    }
+                }
+                console.log(`point : ${point}`);
+                // alert("asdas");
+                if (point == 3) {
+                    containerPlayer.classList.toggle("containerPlayerDisplay");
+                    tambahPoint.innerHTML += "|";
+                    for (let u = (i + 2); u >= i; u--) {
+                        let selector = document.querySelector(`.kotak${barisSelector - u}${kolomSelector - u}`);
+                        selector.classList.add("dead");
+                    }
+                    papah.removeEventListener("click", clickFunctionPapah2);
+                    papah.addEventListener("click", clickFunctionPapah);
+                    return;
+                }
+            }
+        }
+
+        // looping serong kanan
+        for (let o = 0; o <= 2; o++) {
+            point = 0;
+            for (let i = (2 - o); i >= (o * -1); i--) {
+                let elementSelector = document.querySelector(`.kotak${barisSelector + i}${kolomSelector - i}`);
+                console.log(elementSelector);
+                if (elementSelector != null) {
+                    if (elementSelector.style.backgroundColor == "rgb(120, 255, 156)" && elementSelector.classList.item(3) == punyaPlayer && !elementSelector.classList.contains("dead")) {
+                        point++;
+                    }
+                }
+                console.log(`point : ${point}`);
+                // alert("asdas");
+                if (point == 3) {
+                    containerPlayer.classList.toggle("containerPlayerDisplay");
+                    tambahPoint.innerHTML += "|";
+                    for (let u = (i + 2); u >= i; u--) {
+                        let selector = document.querySelector(`.kotak${barisSelector + u}${kolomSelector - u}`);
+                        selector.classList.add("dead");
+                    }
+                    papah.removeEventListener("click", clickFunctionPapah2);
+                    papah.addEventListener("click", clickFunctionPapah);
+                    return;
+                }
+            }
+        }
+
+        for (let i = 0; i < arrBlock.length; i++) {
+            arrBlock[i].style.backgroundColor = "#dbdbdb";
+        }
+        arrBlock = [];
+        let retryCW = confirm(`pola undefined, retry?`);
+        if (!retryCW) {
+            papah.removeEventListener("click", clickFunctionPapah2);
+            papah.addEventListener("click", clickFunctionPapah);
+            play++;
+            // looping jalan player
+            if (play >= player.length) {
+                play = 0;
+            }
+            // image jalan now
+            containerPlayerJalanNow.firstElementChild.innerHTML = `player ${player[play]} jalan!`;
+            containerPlayerJalanNow.lastElementChild.replaceWith(imgTicTacToe[play]);
+        }
+    }
+    // function winVertikal(){
+    //     containerPlayer.classList.toggle("containerPlayerDisplay");
+    //     tambahPoint.innerHTML += "|";
+    //     for(let o = (i - 2) ; o <= i ; o++){
+    //         let selector = document.querySelector(`.kotak${o}${kolomSelector}`);
+    //         selector.classList.add("dead");
+    //     }
+    //     // return;
+    // }
+
+    // canvas image section
+    var canvas, ctx, flag = false,
+        prevX = 0,
+        currX = 0,
+        prevY = 0,
+        currY = 0,
+        dot_flag = false;
+
+    let btnNextPlayer = document.querySelector("#btnNextPlayer");
+
+    var x = "black",
+        y = 2;
+
+    function init() {
+        canvas = document.getElementById('can');
+        ctx = canvas.getContext("2d");
+        w = canvas.width;
+        h = canvas.height;
+
+        canvas.addEventListener("mousemove", function (e) {
+            findxy('move', e)
+        }, false);
+        canvas.addEventListener("mousedown", function (e) {
+            findxy('down', e)
+        }, false);
+        canvas.addEventListener("mouseup", function (e) {
+            findxy('up', e)
+        }, false);
+        canvas.addEventListener("mouseout", function (e) {
+            findxy('out', e)
+        }, false);
+    }
+
+    function color(obj) {
+        switch (obj.id) {
+            case "green":
+                x = "green";
+                break;
+            case "blue":
+                x = "blue";
+                break;
+            case "red":
+                x = "red";
+                break;
+            case "yellow":
+                x = "yellow";
+                break;
+            case "orange":
+                x = "orange";
+                break;
+            case "black":
+                x = "black";
+                break;
+            case "white":
+                x = "white";
+                break;
+        }
+        if (x == "white") y = 14;
+        else y = 2;
+
+    }
+
+    function draw() {
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(currX, currY);
+        ctx.strokeStyle = x;
+        ctx.lineWidth = y;
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    function erase() {
+        var m = confirm("clear?");
+        if (m) {
+            ctx.clearRect(0, 0, w, h);
+            document.getElementById("canvasimg").style.display = "none";
+        }
+    }
+
+    function save() {
+        document.getElementById("canvasimg").style.border = "2px solid";
+        dataURL = canvas.toDataURL();
+        document.getElementById("canvasimg").src = dataURL;
+        document.getElementById("canvasimg").style.display = "inline";
+        btnNextPlayer.style.display = "block";
+    }
+
+    function findxy(res, e) {
+        if (res == 'down') {
+            prevX = currX;
+            prevY = currY;
+            currX = e.clientX - canvas.offsetLeft;
+            currY = e.clientY - canvas.offsetTop;
+
+            flag = true;
+            dot_flag = true;
+            if (dot_flag) {
+                ctx.beginPath();
+                ctx.fillStyle = x;
+                ctx.fillRect(currX, currY, 2, 2);
+                ctx.closePath();
+                dot_flag = false;
+            }
+        }
+        if (res == 'up' || res == "out") {
+            flag = false;
+        }
+        if (res == 'move') {
+            if (flag) {
+                prevX = currX;
+                prevY = currY;
+                currX = e.clientX - canvas.offsetLeft;
+                currY = e.clientY - canvas.offsetTop;
+                draw();
+            }
+        }
+    }
+
+
+    document.addEventListener("keypress", function (e) {
+        // q =  toggle container display
+        if (e.key == "q") {
+            containerPlayer.classList.toggle("containerPlayerDisplay");
+            // containerPlayerButton.style.backgroundColor = "red";
+            // containerPlayerButton.innerHTML = "RESTART!";
+        }
+    });
+</script>
+
+</html>
