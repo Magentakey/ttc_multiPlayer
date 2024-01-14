@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -131,10 +131,10 @@
             <!-- <p>point player 1 : </p> -->
             <!-- <p>point player 2 : </p> -->
         </div>
-        <div class="containerOption">
-            <input id="panjangBaris" type="text" placeholder="baris" value="">
-            <input id="panjangKolom" type="text" placeholder="kolom" value="">
-            <input id="banyakPlayer" type="text" placeholder="banyak player" value="">
+        <div class="containerOption" style="display:flex; flex-direction: column;">
+            <input style="width: 80%;" id="panjangBaris" type="text" placeholder="baris" value="">
+            <input style="width: 80%;" id="panjangKolom" type="text" placeholder="kolom" value="">
+            <input style="width: 80%;" id="banyakPlayer" type="text" placeholder="banyak player" value="">
         </div>
         <button id="btnPlayReset" type="button" onclick="playGame()">PLAY!</button>
         <!-- <button style="display:none;" id="btnPlayCheckWin" type="button"
@@ -148,7 +148,7 @@
         <br><br>
         <div style="display: flex;align-items: flex-start;height:70%;">
             <h4 style="position: absolute;">create image Tic Tac Toe</h4>
-            <canvas id="can" width="400px" height="400px" style="border:2px solid;"></canvas>
+            <canvas id="can" style="border:2px solid;width: 40vw;height: 60vh;"></canvas>
             <div>
                 Color
                 <div style="display: grid; grid-template-columns: auto auto auto;">
@@ -164,7 +164,7 @@
                 </div>
             </div>
             <div style="position: relative;">
-                <img id="canvasimg" style="display:none;">
+                <img id="canvasimg" style="display:none;border:2px solid;width: 40vw;height: 60vh;">
                 <input style="position: absolute;left:0;bottom:0;display: none;" type="button" value="next"
                     id="btnNextPlayer" size="30" onclick="nextPlayer()">
             </div>
