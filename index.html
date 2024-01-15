@@ -117,14 +117,14 @@
     </style>
 </head>
 
-<body onload="init()">
+<body>
     <div class="containerPlayerJalanNow">
         <p><!-- player 1 jalan --></p>
         <!-- <img src="image/o-tic-tac-toc.jpg" style="max-width: 100%;max-height: 100%;aspect-ratio: 2.5 / 1;"> -->
         <img>
     </div>
 
-    <div class="containerPlayer">
+    <div class="containerPlayer" style="width: 30vw;">
         <div style="position:absolute;right:0;cursor:default"
             onclick="containerPlayer.classList.toggle('containerPlayerDisplay');">X</div>
         <div class="containerPointPlayer">
@@ -148,7 +148,7 @@
         <br><br>
         <div style="display: flex;align-items: flex-start;height:70%;">
             <h4 style="position: absolute;">create image Tic Tac Toe</h4>
-            <canvas id="can" style="border:2px solid;width: 40vw;height: 60vh;"></canvas>
+            <canvas id="can" style="border:2px solid;max-width: 1200px;max-height: 1200px;"></canvas>
             <div>
                 Color
                 <div style="display: grid; grid-template-columns: auto auto auto;">
@@ -164,7 +164,7 @@
                 </div>
             </div>
             <div style="position: relative;">
-                <img id="canvasimg" style="display:none;border:2px solid;width: 40vw;height: 60vh;">
+                <img id="canvasimg" style="display:none;border:2px solid;width: 40vw;">
                 <input style="position: absolute;left:0;bottom:0;display: none;" type="button" value="next"
                     id="btnNextPlayer" size="30" onclick="nextPlayer()">
             </div>
@@ -637,38 +637,34 @@
     // }
 
     // canvas image section
-    var canvas, ctx, flag = false,
-        prevX = 0,
-        currX = 0,
-        prevY = 0,
-        currY = 0,
-        dot_flag = false;
+    const canvas = document.querySelector('#can');
 
-    let btnNextPlayer = document.querySelector("#btnNextPlayer");
+    const ctx = canvas.getContext('2d');
+    // all the drawing for the canvas in ctx
+    canvas.height = 300;
+    canvas.width = 300;
+    console.log(canvas.height);
+    console.log(canvas.width);
 
-    var x = "black",
-        y = 2;
 
-    function init() {
-        canvas = document.getElementById('can');
-        ctx = canvas.getContext("2d");
-        w = canvas.width;
-        h = canvas.height;
-
-        canvas.addEventListener("mousemove", function (e) {
-            findxy('move', e)
-        }, false);
-        canvas.addEventListener("mousedown", function (e) {
-            findxy('down', e)
-        }, false);
-        canvas.addEventListener("mouseup", function (e) {
-            findxy('up', e)
-        }, false);
-        canvas.addEventListener("mouseout", function (e) {
-            findxy('out', e)
-        }, false);
+    function erase() {
+        var m = confirm("clear?");
+        if (m) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
     }
 
+    function save() {
+        document.getElementById("canvasimg").style.border = "2px solid";
+        dataURL = canvas.toDataURL();
+        document.getElementById("canvasimg").src = dataURL;
+        document.getElementById("canvasimg").style.display = "inline";
+        btnNextPlayer.style.display = "block";
+    }
+
+
+    let x = "black";
+    let y = 15;
     function color(obj) {
         switch (obj.id) {
             case "green":
@@ -693,67 +689,75 @@
                 x = "white";
                 break;
         }
-        if (x == "white") y = 14;
-        else y = 2;
+        if (x == "white") { y = 30 }
+        else { y = 15 };
 
     }
 
-    function draw() {
-        ctx.beginPath();
-        ctx.moveTo(prevX, prevY);
-        ctx.lineTo(currX, currY);
+    ctx.strokeStyle = x;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = y;
+
+    //flag
+    let isDrawing = false; //don't draw when mouse is just moving mouse w/o doing anything
+
+    //where to start a line from and then where to end it
+    let lastX = 0;
+    let lastY = 0;
+    let hue = 0;
+    let direction = true;
+
+    function draw(e) {
+        if (!isDrawing)
+            return; //only run in click and drag
+        console.log(e);
         ctx.strokeStyle = x;
-        ctx.lineWidth = y;
-        ctx.stroke();
-        ctx.closePath();
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY); //start from
+        ctx.lineTo(e.offsetX, e.offsetY); //go to
+        ctx.stroke(); //to actually draw the path on canvas
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+        // lastX=e.offsetX;
+        // lastY=e.offsetY;
     }
 
-    function erase() {
-        var m = confirm("clear?");
-        if (m) {
-            ctx.clearRect(0, 0, w, h);
-            document.getElementById("canvasimg").style.display = "none";
-        }
-    }
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
 
-    function save() {
-        document.getElementById("canvasimg").style.border = "2px solid";
-        dataURL = canvas.toDataURL();
-        document.getElementById("canvasimg").src = dataURL;
-        document.getElementById("canvasimg").style.display = "inline";
-        btnNextPlayer.style.display = "block";
-    }
 
-    function findxy(res, e) {
-        if (res == 'down') {
-            prevX = currX;
-            prevY = currY;
-            currX = e.clientX - canvas.offsetLeft;
-            currY = e.clientY - canvas.offsetTop;
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false);
 
-            flag = true;
-            dot_flag = true;
-            if (dot_flag) {
-                ctx.beginPath();
-                ctx.fillStyle = x;
-                ctx.fillRect(currX, currY, 2, 2);
-                ctx.closePath();
-                dot_flag = false;
-            }
+
+    //canvas on mobile
+
+    document.body.addEventListener("touchstart", function (e) {
+        if (e.target == canvas) {
+            e.preventDefault();
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+            isDrawing = true;
+            draw(clientX, clientY)
         }
-        if (res == 'up' || res == "out") {
-            flag = false;
+    }, false);
+    document.body.addEventListener("touchend", function (e) {
+        if (e.target == canvas) {
+            e.preventDefault();
+            isDrawing = false;
         }
-        if (res == 'move') {
-            if (flag) {
-                prevX = currX;
-                prevY = currY;
-                currX = e.clientX - canvas.offsetLeft;
-                currY = e.clientY - canvas.offsetTop;
-                draw();
-            }
+    }, false);
+    document.body.addEventListener("touchmove", function (e) {
+        if (e.target == canvas) {
+            e.preventDefault();
+            e.offsetX = e.targetTouches[0].clientX;
+            e.offsetY = e.targetTouches[0].clientY;
+            draw(e)
         }
-    }
+    }, false);
 
 
     document.addEventListener("keypress", function (e) {
